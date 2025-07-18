@@ -1,0 +1,11 @@
+[detection]
+override = "maven"
+
+[phases.install]
+commands = ["mvn -B clean install -DskipTests"]
+
+[phases.build]
+commands = ["mvn -B package -DskipTests"]
+
+[start]
+cmd = "java -jar target/*.jar"

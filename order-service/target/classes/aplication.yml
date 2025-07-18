@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: aec-order
+  datasource:
+    url:      ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/aec}
+    username: ${DATASOURCE_USER:aec}
+    password: ${DATASOURCE_PASS:2412}
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+
+server:
+  port: ${SERVER_PORT:8085}
+
+jwt:
+  secret:    ${JWT_SECRET:Cuetm0BgR8Bjk8Mo2OXtOlOxkc/N1K2g3vKx82o8Lcw=}
+  accessMs:  ${JWT_ACCESS_MS:3600000}
+  refreshMs: ${JWT_REFRESH_MS:86400000}
+
+external:
+  user-service:    ${USERS_SVC_URL:http://localhost:8081}
+  file-service:    ${FILE_SVC_URL:http://localhost:8084}
+  product-service: ${PRODUCT_SVC_URL:http://localhost:8083}
+
+file:
+  upload-dir: ${UPLOAD_DIR:/home/tesis/productosaec/aec/file-service/uploads}
+
+paypal:
+  client-id:     ${PAYPAL_CLIENT_ID:AR8TS3…}
+  client-secret: ${PAYPAL_CLIENT_SECRET:EDEiz…}
+  environment:   ${PAYPAL_ENVIRONMENT:live}
+
+logging:
+  level:
+    com.aec.ordsrv: DEBUG
+    org.springframework.web: DEBUG
+
+spring:
+  mail:
+    host:       ${MAIL_HOST:smtp.hostinger.com}
+    port:       ${MAIL_PORT:587}
+    username:   ${MAIL_USER:support@aecblock.com}
+    password:   ${MAIL_PASS:ProductosAec2025@}
+    protocol:   smtp
+    properties:
+      mail.smtp.auth:            true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: ${MAIL_CONN_TIMEOUT:5000}
+      mail.smtp.timeout:           ${MAIL_TIMEOUT:5000}
+      mail.smtp.writetimeout:      ${MAIL_WRITE_TIMEOUT:5000}
+    default-encoding: UTF-8
