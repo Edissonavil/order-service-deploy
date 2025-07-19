@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 import java.util.stream.Collectors;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

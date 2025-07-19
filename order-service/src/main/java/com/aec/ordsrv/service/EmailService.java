@@ -20,6 +20,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String senderEmail;
 
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -61,7 +62,7 @@ public class EmailService {
                 <p>Nos complace informarte que tu pago para la Orden <strong>#%d</strong> ha sido <strong>aprobado</strong>.</p>
                 <p>Ahora puedes acceder a la descarga de tus productos desde tu cuenta.</p>
                 <p>Gracias por tu compra.</p>
-                <p>Saludos cordiales,<br/>El equipo de Productos Aec</p>
+                <p>Saludos cordiales,<br/>El equipo de AECBlock</p>
               </body>
             </html>
             """, name, orderId);
@@ -83,10 +84,41 @@ public class EmailService {
                 <p>Comentario del administrador: %s</p>
                 <p>Por favor, revisa la información de tu transferencia e intenta subir un nuevo comprobante si es necesario, o contacta a soporte para más asistencia.</p>
                 <p>Lamentamos cualquier inconveniente.</p>
-                <p>Saludos cordiales,<br/>El equipo de Productos Aec</p>
+                <p>Saludos cordiales,<br/>El equipo de AECBlock</p>
               </body>
             </html>
             """, name, orderId, comment);
         sendHtmlEmail(customerEmail, subject, html);
+    }
+
+
+    @Value("${admin.email:support@aecblock.com}") // Valor por defecto si no se configura
+    private String adminEmailRecipient;
+
+
+       public void sendReceiptUploadedNotification(Long orderId, String customerUsername, String customerEmail, double totalAmount) {
+        if (adminEmailRecipient == null || adminEmailRecipient.isBlank()) {
+            log.error("No se puede enviar notificación de comprobante subido: el correo del administrador no está configurado.");
+            return;
+        }
+
+        String subject = "🔔 Nuevo Comprobante Subido para Orden #" + orderId;
+        String html = String.format("""
+            <html>
+              <body>
+                <p>Estimado Administrador,</p>
+                <p>Se ha subido un nuevo comprobante de pago para la Orden <strong>#%d</strong>.</p>
+                <ul>
+                  <li><strong>Cliente:</strong> %s</li>
+                  <li><strong>Email del Cliente:</strong> %s</li>
+                  <li><strong>Monto Total:</strong> $%.2f</li>
+                </ul>
+                <p>Por favor, revisa el comprobante y aprueba o rechaza el pago según corresponda.</p>
+                <p>Saludos cordiales,<br/>El sistema de AECBlock</p>
+              </body>
+            </html>
+            """, orderId, customerUsername, customerEmail, totalAmount);
+
+        sendHtmlEmail(adminEmailRecipient, subject, html);
     }
 }

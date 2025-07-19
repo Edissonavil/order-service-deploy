@@ -1,51 +1,60 @@
 spring:
   application:
     name: aec-order
+  # Configuración de la base de datos
   datasource:
-    url:      ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/aec}
-    username: ${DATASOURCE_USER:aec}
-    password: ${DATASOURCE_PASS:2412}
+    url: ${DATASOURCE_URL} # SIN valor por defecto para seguridad
+    username: ${DATASOURCE_USER} # SIN valor por defecto para seguridad
+    password: ${DATASOURCE_PASS} # SIN valor por defecto para seguridad
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO:update}
+      ddl-auto: ${DDL_AUTO:update} # 'update' es un valor por defecto común para desarrollo. Considera 'none' o 'validate' para producción.
 
+  # Configuración de correo electrónico
+  mail:
+    host: ${MAIL_HOST} # SIN valor por defecto para seguridad
+    port: ${MAIL_PORT:587} # Puerto puede tener valor por defecto
+    username: ${MAIL_USER} # SIN valor por defecto para seguridad
+    password: ${MAIL_PASS} # SIN valor por defecto para seguridad
+    protocol: smtp
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: ${MAIL_CONN_TIMEOUT:5000}
+      mail.smtp.timeout: ${MAIL_TIMEOUT:5000}
+      mail.smtp.writetimeout: ${MAIL_WRITE_TIMEOUT:5000}
+      # Nota: mail.smtp.ssl.enable y mail.smtp.ssl.trust pueden ser delicados.
+      # Si usas STARTTLS en el puerto 587, ssl.enable debería ser 'false' para el TLS inicial.
+      # Si usas SSL/TLS directo en el puerto 465, ssl.enable debería ser 'true'.
+      # Confirma la configuración de tu proveedor (Hostinger generalmente usa STARTTLS en 587).
+      mail.smtp.ssl.enable: false # Confirmar según tu configuración de proveedor
+      mail.smtp.ssl.trust: ${MAIL_HOST} # Toma la variable de entorno
+    default-encoding: UTF-8
+    
+  admin:
+      email: ${ADMIN_EMAIL} # SIN valor por defecto para seguridad
 server:
-  port: ${SERVER_PORT:8085}
+  port: ${SERVER_PORT:8085} # El puerto puede tener un valor por defecto para desarrollo local
 
 jwt:
-  secret:    ${JWT_SECRET:Cuetm0BgR8Bjk8Mo2OXtOlOxkc/N1K2g3vKx82o8Lcw=}
-  accessMs:  ${JWT_ACCESS_MS:3600000}
-  refreshMs: ${JWT_REFRESH_MS:86400000}
+  secret: ${JWT_SECRET} # ¡CRÍTICO! SIN valor por defecto para seguridad
+  accessMs: ${JWT_ACCESS_MS:3600000} # Las duraciones pueden tener valores por defecto
+  refreshMs: ${JWT_REFRESH_MS:86400000} # Las duraciones pueden tener valores por defecto
 
 external:
-  user-service:    ${USERS_SVC_URL:http://localhost:8081}
-  file-service:    ${FILE_SVC_URL:http://localhost:8084}
-  product-service: ${PRODUCT_SVC_URL:http://localhost:8083}
+  user-service: ${USERS_SVC_URL:http://localhost:8081} # URL de servicio externo, puede tener valor por defecto local
+  file-service: ${FILE_SVC_URL:http://localhost:8084} # URL de servicio externo, puede tener valor por defecto local
+  product-service: ${PRODUCT_SVC_URL:http://localhost:8083} # URL de servicio externo, puede tener valor por defecto local
 
 file:
-  upload-dir: ${UPLOAD_DIR:/home/tesis/productosaec/aec/file-service/uploads}
+  upload-dir: ${UPLOAD_DIR:/tmp/aec_uploads} # Ruta de directorio, ¡cambiada a una ruta más genérica para entornos de nube!
 
 paypal:
-  client-id:     ${PAYPAL_CLIENT_ID:AR8TS3…}
-  client-secret: ${PAYPAL_CLIENT_SECRET:EDEiz…}
-  environment:   ${PAYPAL_ENVIRONMENT:live}
+  client-id: ${PAYPAL_CLIENT_ID} # SIN valor por defecto para seguridad
+  client-secret: ${PAYPAL_CLIENT_SECRET} # SIN valor por defecto para seguridad
+  environment: ${PAYPAL_ENVIRONMENT:sandbox} # El entorno de PayPal puede tener un valor por defecto, como 'sandbox'
 
 logging:
   level:
     com.aec.ordsrv: DEBUG
     org.springframework.web: DEBUG
-
-spring:
-  mail:
-    host:       ${MAIL_HOST:smtp.hostinger.com}
-    port:       ${MAIL_PORT:587}
-    username:   ${MAIL_USER:support@aecblock.com}
-    password:   ${MAIL_PASS:ProductosAec2025@}
-    protocol:   smtp
-    properties:
-      mail.smtp.auth:            true
-      mail.smtp.starttls.enable: true
-      mail.smtp.connectiontimeout: ${MAIL_CONN_TIMEOUT:5000}
-      mail.smtp.timeout:           ${MAIL_TIMEOUT:5000}
-      mail.smtp.writetimeout:      ${MAIL_WRITE_TIMEOUT:5000}
-    default-encoding: UTF-8

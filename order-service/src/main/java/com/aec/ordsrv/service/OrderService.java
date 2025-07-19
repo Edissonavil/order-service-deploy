@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -247,22 +248,56 @@ private OrderDto completeOrderFromCartInternal(String customerUsername, String p
         return toDto(saved);
     }
 
-    @Transactional(readOnly = true)
-    public OrderDto findOrderDtoById(String identifier) {
-        Order o;
-        try {
-            Long id = Long.parseLong(identifier);
-            o = orderRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Order no encontrada ID interno: " + identifier));
-        } catch (NumberFormatException ex) {
-            o = orderRepository.findByPaypalOrderId(identifier)
-                    .or(() -> orderRepository.findByManualTransferRefId(identifier))
-                    .orElseThrow(() -> new EntityNotFoundException("Order no encontrada ID externo: " + identifier));
-        }
-        return toDto(o);
-    }
+@Transactional(readOnly = true)
 
-    @Transactional
+public OrderDto findOrderDtoById(String orderIdentifier, String username) {
+
+Optional<Order> orderOptional;
+
+
+
+try {
+
+// Intenta parsear como Long (ID de la base de datos)
+
+Long id = Long.parseLong(orderIdentifier);
+
+orderOptional = orderRepository.findById(id);
+
+} catch (NumberFormatException e) {
+
+// Si no es un Long, intenta buscar por PayPalOrderId o ManualTransferRefId
+
+orderOptional = orderRepository.findByPaypalOrderId(orderIdentifier)
+
+.or(() -> orderRepository.findByManualTransferRefId(orderIdentifier));
+
+}
+
+
+
+Order order = orderOptional.orElseThrow(() ->
+
+new EntityNotFoundException("Orden no encontrada con identificador: " + orderIdentifier));
+
+
+
+// Seguridad: Asegúrate de que el usuario actual es el propietario de la orden
+
+if (!order.getClienteUsername().equals(username)) {
+
+throw new AccessDeniedException("No tienes permiso para ver esta orden.");
+
+}
+
+
+return toDto(order);
+
+}
+
+
+
+      @Transactional
     public OrderDto uploadReceipt(Long orderId, MultipartFile file, String uploaderUsername) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada"));
@@ -280,8 +315,20 @@ private OrderDto completeOrderFromCartInternal(String customerUsername, String p
         order.setStatus(OrderStatus.PENDING);
         orderRepository.save(order);
 
+        try {
+            emailService.sendReceiptUploadedNotification(
+                    order.getId(),
+                    order.getClienteUsername(),
+                    order.getCustomerEmail(),
+                    order.getTotal()
+            );
+        } catch (Exception e) {
+            log.error("Error al enviar email de notificación de comprobante para orden {}: {}", order.getId(), e.getMessage());
+        }
+
         return toDto(order);
     }
+
 
     @Transactional
 public OrderDto approveManualPayment(Long orderId, String adminComment, String adminUsername) {
@@ -494,210 +541,8 @@ if (PaymentStatus.PAID.equals(o.getPaymentStatus()) && externalId != null) {
             .build();
 }
 
-public List<ProductSalesDto> getCreatorProductSalesStats(String creatorUsername, Instant from, Instant to) {
-    // 1) Recupera solo órdenes completadas del colaborador
-    List<Order> completedOrders = orderRepository
-        .findByCreatorUsernameAndStatusAndCreadoEnBetween(
-            creatorUsername, OrderStatus.COMPLETED, from, to
-        );
-
-    // 2) Genera DTOs intermedios (sin nombre aún)
-    Map<String, ProductSalesDto> statsMap = completedOrders.stream()
-        .flatMap(order -> order.getItems().stream()
-            .map(item -> ProductSalesDto.builder()
-                .productId(item.getProductId())
-                .productName(null)                        // se rellenará más abajo
-                .paymentMethod(safePayMethod(order))
-                .totalSalesAmount(
-                    BigDecimal.valueOf(item.getPrecioUnitario())
-                              .multiply(BigDecimal.valueOf(item.getCantidad()))
-                )
-                .totalQuantity(item.getCantidad())
-                .orderCount(1L)
-                .build()
-            )
-        )
-        .collect(Collectors.toMap(
-            dto -> dto.getProductId() + "-" + dto.getPaymentMethod(),
-            dto -> dto,
-            (existing, newer) -> ProductSalesDto.builder()
-                .productId(existing.getProductId())
-                .productName(null)                         // idem
-                .paymentMethod(existing.getPaymentMethod())
-                .totalSalesAmount(existing.getTotalSalesAmount().add(newer.getTotalSalesAmount()))
-                .totalQuantity(existing.getTotalQuantity() + newer.getTotalQuantity())
-                .orderCount(existing.getOrderCount() + newer.getOrderCount())
-                .build()
-        ));
-
-    // 3) Rellena el nombre de producto llamando a productClient
-    String bearer = extractBearer();
-    return statsMap.values().stream()
-        .map(dto -> {
-            try {
-                var prod = productClient.getById(dto.getProductId(), bearer);
-                return ProductSalesDto.builder()
-                    .productId(dto.getProductId())
-                    .productName(prod.getNombre())
-                    .paymentMethod(dto.getPaymentMethod())
-                    .totalSalesAmount(dto.getTotalSalesAmount())
-                    .totalQuantity(dto.getTotalQuantity())
-                    .orderCount(dto.getOrderCount())
-                    .build();
-            } catch (FeignException e) {
-                log.warn("No se pudo obtener nombre para producto {}: {}", dto.getProductId(), e.getMessage());
-                return ProductSalesDto.builder()
-                    .productId(dto.getProductId())
-                    .productName("UNKNOWN")
-                    .paymentMethod(dto.getPaymentMethod())
-                    .totalSalesAmount(dto.getTotalSalesAmount())
-                    .totalQuantity(dto.getTotalQuantity())
-                    .orderCount(dto.getOrderCount())
-                    .build();
-            }
-        })
-        .toList();
-}
 
 
-    public List<CollaboratorMonthlyStatsDto> getAllCollaboratorsSalesStats(Instant from, Instant to) {
-    // 1) Solo órdenes completadas
-    List<Order> completedOrders = orderRepository
-        .findByStatusAndCreadoEnBetween(OrderStatus.COMPLETED, from, to);
-
-    // 2) Filtra fuera cualquier Order sin creatorUsername
-    Map<String, List<Order>> byCreator = completedOrders.stream()
-        .filter(o -> o.getCreatorUsername() != null)
-        .collect(Collectors.groupingBy(Order::getCreatorUsername));
-
-    String bearer = extractBearer();
-    List<CollaboratorMonthlyStatsDto> result = new ArrayList<>();
-
-    byCreator.forEach((username, orders) -> {
-        // 3) Para cada colaborador, agrupa por producto+método
-        Map<String, ProductSalesDto> productMap = orders.stream()
-            .flatMap(order -> order.getItems().stream()
-                .map(item -> ProductSalesDto.builder()
-                    .productId(item.getProductId())
-                    .productName(null)                // relleno más abajo
-                    .paymentMethod(safePayMethod(order))
-                    .totalSalesAmount(
-                        BigDecimal.valueOf(item.getPrecioUnitario())
-                                  .multiply(BigDecimal.valueOf(item.getCantidad()))
-                    )
-                    .totalQuantity(item.getCantidad())
-                    .orderCount(1L)
-                    .build()
-                )
-            )
-            .collect(Collectors.toMap(
-                dto -> dto.getProductId() + "-" + dto.getPaymentMethod(),
-                dto -> dto,
-                (a, b) -> ProductSalesDto.builder()
-                    .productId(a.getProductId())
-                    .productName(null)
-                    .paymentMethod(a.getPaymentMethod())
-                    .totalSalesAmount(a.getTotalSalesAmount().add(b.getTotalSalesAmount()))
-                    .totalQuantity(a.getTotalQuantity() + b.getTotalQuantity())
-                    .orderCount(a.getOrderCount() + b.getOrderCount())
-                    .build()
-            ));
-
-        // 4) Rellenar nombres
-        List<ProductSalesDto> salesWithNames = productMap.values().stream()
-            .map(dto -> {
-                try {
-                    var prod = productClient.getById(dto.getProductId(), bearer);
-                    return ProductSalesDto.builder()
-                        .productId(dto.getProductId())
-                        .productName(prod.getNombre())
-                        .paymentMethod(dto.getPaymentMethod())
-                        .totalSalesAmount(dto.getTotalSalesAmount())
-                        .totalQuantity(dto.getTotalQuantity())
-                        .orderCount(dto.getOrderCount())
-                        .build();
-                } catch (FeignException e) {
-                    return ProductSalesDto.builder()
-                        .productId(dto.getProductId())
-                        .productName("UNKNOWN")
-                        .paymentMethod(dto.getPaymentMethod())
-                        .totalSalesAmount(dto.getTotalSalesAmount())
-                        .totalQuantity(dto.getTotalQuantity())
-                        .orderCount(dto.getOrderCount())
-                        .build();
-                }
-            })
-            .toList();
-
-        // 5) Total colaborador
-        BigDecimal totalSales = salesWithNames.stream()
-            .map(ProductSalesDto::getTotalSalesAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        result.add(CollaboratorMonthlyStatsDto.builder()
-            .collaboratorUsername(username)
-            .productSales(salesWithNames)
-            .totalCollaboratorSales(totalSales)
-            .build()
-        );
-    });
-
-    return result;
-}
-
-
-
-
-  public List<ProductSalesDto> getUploaderSalesStats(String uploader, Instant from, Instant to) {
-    return orderRepository.findByUploaderAndPeriod(uploader, from, to);
-  }
-
-
-    @Transactional(readOnly = true)
-public List<ProductSalesDto> getUploaderProductSalesStats(
-        String uploaderUsername, Instant from, Instant to) {
-
-    // 1) Todos los pedidos COMPLETED en el rango
-    List<Order> completed = orderRepository
-        .findByStatusAndCreadoEnBetween(OrderStatus.COMPLETED, from, to);
-
-    // 2) Filtrar los productos que realmente subió ese colaborador
-    String bearer = jwtToken();
-    List<ProductDto> mine = productClient.findByUploader(uploaderUsername, bearer);
-    Set<Long> myIds = mine.stream()
-                          .map(ProductDto::getId)
-                          .collect(Collectors.toSet());
-
-    // 3) Recolectar solo los orderItems de esos productos
-    Map<String, ProductSalesDto> map = completed.stream()
-      .flatMap(o -> o.getItems().stream()
-        .filter(it -> myIds.contains(it.getProductId()))
-        .map(it -> {
-           BigDecimal sales = BigDecimal.valueOf(it.getPrecioUnitario())
-                                        .multiply(BigDecimal.valueOf(it.getCantidad()));
-           return ProductSalesDto.builder()
-             .productId(it.getProductId())
-             .paymentMethod(o.getPaymentMethod().name())
-             .totalSalesAmount(sales)
-             .totalQuantity(it.getCantidad())
-             .orderCount(1L)
-             .build();
-        })
-      )
-      .collect(Collectors.toMap(
-        dto -> dto.getProductId()+"-"+dto.getPaymentMethod(),
-        dto -> dto,
-        (a,b) -> ProductSalesDto.builder()
-                     .productId(a.getProductId())
-                     .paymentMethod(a.getPaymentMethod())
-                     .totalSalesAmount(a.getTotalSalesAmount().add(b.getTotalSalesAmount()))
-                     .totalQuantity(a.getTotalQuantity()+b.getTotalQuantity())
-                     .orderCount(a.getOrderCount()+b.getOrderCount())
-                     .build()
-      ));
-
-    return new ArrayList<>(map.values());
-}
 
 }
 

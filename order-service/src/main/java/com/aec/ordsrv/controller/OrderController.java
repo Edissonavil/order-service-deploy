@@ -146,17 +146,15 @@ public void downloadOrderFiles(
         Authentication authentication) throws IOException {
 
     log.info("==> DESCARGA ZIP para orden {}", orderId);
-    OrderDto dto = orderService.findOrderDtoById(orderId);
+        String username = authentication.getName(); // Obtiene el nombre de usuario del objeto Authentication
+    OrderDto dto = orderService.findOrderDtoById(orderId, username); // <-- Pasa AHORA los dos argumentos
+    
     Long productId = dto.getItems().get(0).getProductId();
 
     response.setContentType("application/zip");
     response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"pedido-" + orderId + "-productos.zip\"");
-
-    // ahora va a /uploads/productos/{productId}
     zipService.streamProductZip(productId, response.getOutputStream());
-
-    // vaciar carrito
     orderService.clearCart(authentication.getName());
 }
 
@@ -243,140 +241,18 @@ public void downloadOrderFiles(
                 return ResponseEntity.ok(dto);
         }
 
-        @GetMapping("/stats/creator/{creatorUsername}")
-        public ResponseEntity<List<ProductSalesDto>> getCreatorMonthlySalesStats(
-                        @PathVariable String creatorUsername,
-                        @RequestParam(name = "month") @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
-                        Authentication authentication) {
-
-                if (!authentication.getName().equals(creatorUsername)) {
-                        boolean isAdmin = authentication.getAuthorities().stream()
-                                        .anyMatch(a -> a.getAuthority().equals("ROL_ADMIN"));
-                        if (!isAdmin) {
-                                throw new ResponseStatusException(
-                                                HttpStatus.FORBIDDEN,
-                                                "Acceso denegado: No tiene permiso para ver las estadísticas de este colaborador.");
-                        }
-                }
-
-                Instant startOfMonth = month.atDay(1)
-                                .atStartOfDay(ZoneId.of("UTC"))
-                                .toInstant();
-
-                Instant endOfMonth = month.atEndOfMonth()
-                                .atTime(23, 59, 59)
-                                .atZone(ZoneId.of("UTC"))
-                                .toInstant();
-
-                log.info("Solicitando estadísticas de ventas para '{}' en {}", creatorUsername, month);
-                List<ProductSalesDto> stats = orderService.getCreatorProductSalesStats(creatorUsername, startOfMonth,
-                                endOfMonth);
-                return ResponseEntity.ok(stats);
-        }
-
-        @GetMapping("/stats/admin/monthly-sales")
-        public ResponseEntity<List<CollaboratorMonthlyStatsDto>> getAllCollaboratorsMonthlySalesStats(
-                        @RequestParam(name = "month") @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-
-                Instant startOfMonth = month.atDay(1)
-                                .atStartOfDay(ZoneId.of("UTC"))
-                                .toInstant();
-
-                Instant endOfMonth = month.atEndOfMonth()
-                                .atTime(23, 59, 59)
-                                .atZone(ZoneId.of("UTC"))
-                                .toInstant();
-
-                log.info("Solicitando estadísticas globales para {}", month);
-                List<CollaboratorMonthlyStatsDto> stats = orderService.getAllCollaboratorsSalesStats(startOfMonth,
-                                endOfMonth);
-                return ResponseEntity.ok(stats);
-        }
-
-        @GetMapping("/creator/{creatorUsername}")
-    public ResponseEntity<List<ProductSalesDto>> creatorStats(
-        @PathVariable String creatorUsername,
-        @RequestParam @DateTimeFormat(pattern="yyyy-MM") YearMonth month
-    ) {
-        Instant from = month.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant to   = month.atEndOfMonth().atTime(23,59,59).atOffset(ZoneOffset.UTC).toInstant();
-
-        List<ProductSalesDto> stats = orderService.getCreatorProductSalesStats(creatorUsername, from, to);
-        return stats.isEmpty()
-            ? ResponseEntity.noContent().build()
-            : ResponseEntity.ok(stats);
-    }
-
-    @GetMapping("/stats/completed")
-@PreAuthorize("hasAuthority('ROL_ADMIN')")
-public ResponseEntity<List<OrderDto>> completedRange(
-    @RequestParam("from") Instant from,
-    @RequestParam("to")   Instant to
-) {
-    List<OrderDto> orders = orderService.findCompletedBetween(from, to);
-    return ResponseEntity.ok(orders);
+        @GetMapping("/{orderIdentifier}") // Cambia el nombre para ser más genérico
+@PreAuthorize("hasAuthority('ROL_CLIENTE')") // Asume que solo los clientes pueden ver sus propias órdenes
+public ResponseEntity<OrderDto> getOrderByIdentifier(
+        @PathVariable String orderIdentifier, // Puede ser el ID de PayPal o el ID de DB
+        Authentication authentication) {
+    
+    log.info("==> Solicitud para obtener orden por identificador: {}", orderIdentifier);
+    String username = authentication.getName(); // Para verificar si la orden pertenece al usuario
+    
+    OrderDto dto = orderService.findOrderDtoById(orderIdentifier, username); 
+    
+    return ResponseEntity.ok(dto);
 }
-
-// en OrderStatsController de ordersrv
-@GetMapping("/api/orders/stats/uploader/monthly-sales")
-public List<ProductSalesDto> getUploaderMonthlySalesStats(
-    @RequestParam("uploader") String uploader,
-    @RequestParam @DateTimeFormat(pattern="yyyy-MM") YearMonth month
-) {
-    Instant from = month.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-    Instant to   = month.atEndOfMonth().atTime(23,59,59).atOffset(ZoneOffset.UTC).toInstant();
-    return orderService.getUploaderSalesStats(uploader, from, to);
-}
-
-    @GetMapping("/uploader/monthly-sales")
-    @PreAuthorize("hasAuthority('ROL_COLABORADOR') or hasAuthority('ROL_ADMIN')")
-    public ResponseEntity<List<ProductSalesDto>> getUploaderMonthlySalesStats(
-        @RequestParam("uploader") String uploader,
-        @RequestParam("month") @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
-        Authentication auth
-    ) {
-        // opcional: validar auth si quieres
-        Instant from = month.atDay(1)
-                            .atStartOfDay(ZoneOffset.UTC)
-                            .toInstant();
-        Instant to   = month.atEndOfMonth()
-                            .atTime(23, 59, 59)
-                            .atOffset(ZoneOffset.UTC)
-                            .toInstant();
-
-        List<ProductSalesDto> stats = orderService.getUploaderProductSalesStats(uploader, from, to);
-        return ResponseEntity.ok(stats);
-    }
-
-    @GetMapping("/stats/uploader/monthly-sales")
-@PreAuthorize("hasAuthority('ROL_COLABORADOR')")
-public ResponseEntity<List<ProductSalesDto>> getUploaderMonthlySales(
-    @RequestParam("uploader") String uploader,
-    @RequestParam("month") @DateTimeFormat(pattern="yyyy-MM") YearMonth month
-) {
-    Instant from = month.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-    Instant to   = month.atEndOfMonth().atTime(23,59,59).atZone(ZoneOffset.UTC).toInstant();
-
-    List<ProductSalesDto> stats = orderService.getUploaderProductSalesStats(uploader, from, to);
-    return stats.isEmpty()
-        ? ResponseEntity.noContent().build()
-        : ResponseEntity.ok(stats);
-}
-
-@GetMapping("/stats/completed")
-@PreAuthorize("hasAuthority('ROL_ADMIN')")
-public ResponseEntity<List<OrderDto>> getCompletedOrders(
-    @RequestParam("from")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    Instant from,
-
-    @RequestParam("to")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    Instant to
-) {
-    List<OrderDto> list = orderService.findCompletedBetween(from, to);
-    return ResponseEntity.ok(list);
-}
-
 
 }

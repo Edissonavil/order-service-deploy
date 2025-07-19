@@ -35,27 +35,26 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCreatorUsernameAndStatusAndCreadoEnBetween(String creatorUsername, OrderStatus status, Instant from, Instant to);
     List<Order> findByStatusAndCreadoEnBetween(OrderStatus status, Instant from, Instant to);
 
-   @Query("""
-    SELECT new com.aec.ordsrv.dto.ProductSalesDto(
-      oi.productId,
-      p.nombre,
-      o.paymentMethod,
-      SUM(oi.precioUnitario * oi.cantidad),
-      SUM(oi.cantidad),
-      COUNT(o.id)
-    )
-    FROM OrderItem oi
-    JOIN oi.order o
-    JOIN Product p ON p.id = oi.productId
-    WHERE p.uploaderUsername = :uploader
-      AND o.status = 'COMPLETED'
-      AND o.creadoEn BETWEEN :from AND :to
-    GROUP BY oi.productId, p.nombre, o.paymentMethod
-  """)
-  List<ProductSalesDto> findByUploaderAndPeriod(
-    @Param("uploader") String uploader,
-    @Param("from")     Instant from,
-    @Param("to")       Instant to
-  );
+ @Query(value = """
+  SELECT 
+    oi.product_id AS productId,
+    p.nombre AS nombre,
+    o.payment_method AS paymentMethod,
+    SUM(oi.precio_unitario * oi.cantidad) AS totalVenta,
+    SUM(oi.cantidad) AS totalCantidad,
+    COUNT(o.id) AS totalOrdenes
+  FROM order_items oi
+  JOIN orders o ON o.id = oi.order_id
+  JOIN products p ON p.id = oi.product_id
+  WHERE p.uploader_username = :uploader
+    AND o.status = 'COMPLETED'
+    AND o.creado_en BETWEEN :from AND :to
+  GROUP BY oi.product_id, p.nombre, o.payment_method
+""", nativeQuery = true)
+List<Object[]> findByUploaderAndPeriodNative(
+  @Param("uploader") String uploader,
+  @Param("from") Instant from,
+  @Param("to") Instant to
+);
 
 }
