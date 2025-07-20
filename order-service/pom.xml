@@ -6,9 +6,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version> <relativePath/> </parent>
+  <groupId>com.aec</groupId>
+  <artifactId>order-service-deploy</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</parent>
+
 
     <groupId>com.aec</groupId>
     <artifactId>order-service</artifactId>
@@ -36,6 +38,12 @@
     </dependencyManagement>
 
     <dependencies>
+    <dependency>
+  <groupId>com.aec</groupId>
+  <artifactId>events</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
