@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: aec-event # Nombre de la aplicación
+
+  # Configuración de la base de datos (¡si el servicio de eventos necesita DB!)
+  datasource:
+    # Usamos las variables específicas de PostgreSQL que Railway inyecta directamente
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update} # 'update' es un buen valor por defecto para desarrollo.
+                                    # Para producción en Railway, ¡usa 'validate' o 'none'!
+    show-sql: true # Útil para depuración. Considera 'false' en producción.
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect # Siempre especifica el dialecto
+
+server:
+  port: ${SERVER_PORT:8087} # Puerto por defecto para desarrollo, Railway usará su propio puerto
+
+jwt:
+  secret: ${JWT_SECRET} # ¡CRÍTICO! SIN valor por defecto para seguridad
+  accessMs: ${JWT_ACCESS_MS:3600000} # Las duraciones pueden tener valores por defecto
+  refreshMs: ${JWT_REFRESH_MS:86400000} # Las duraciones pueden tener valores por defecto

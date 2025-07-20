@@ -1,0 +1,15 @@
+# .nixpacks.toml
+# Configuración genérica para un proyecto Java/Maven.
+# Si 'events' es solo una colección de archivos de datos y no un servicio ejecutable,
+# esta configuración puede ser más de lo necesario o requerir ajustes.
+
+[phases.setup]
+commands = ["export JAVA_HOME=/usr/lib/jvm/default-jvm", "mvn -Dmaven.test.skip=true dependency:resolve"]
+
+[phases.build]
+commands = ["mvn clean package -DskipTests"]
+
+# Si 'events' no es un servicio ejecutable, la sección 'start' podría no ser aplicable.
+# O podría ser un comando para generar algo o simplemente no tener un comando de inicio.
+[start]
+cmd = "echo 'No start command for events module/data'"
