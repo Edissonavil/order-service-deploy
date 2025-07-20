@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: aec-order # Nombre de la aplicación
+
+  # Configuración de la base de datos
+  datasource:
+    # Usamos las variables específicas de PostgreSQL que Railway inyecta directamente
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update} # 'update' es un valor por defecto común para desarrollo.
+                                    # Para producción en Railway, ¡usa 'validate' o 'none'!
+    show-sql: true # Útil para depuración. Considera 'false' en producción.
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect # Siempre especifica el dialecto
+
+  # Configuración de correo electrónico
+  mail:
+    host: ${MAIL_HOST} # Sin valor por defecto aquí, se espera de variable de entorno
+    port: ${MAIL_PORT:587} # Puerto puede tener valor por defecto
+    username: ${MAIL_USER} # Sin valor por defecto aquí, se espera de variable de entorno
+    password: ${MAIL_PASS} # Sin valor por defecto aquí, se espera de variable de entorno
+    protocol: smtp
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: ${MAIL_CONN_TIMEOUT:5000}
+      mail.smtp.timeout: ${MAIL_TIMEOUT:5000}
+      mail.smtp.writetimeout: ${MAIL_WRITE_TIMEOUT:5000}
+      mail.smtp.ssl.enable: false # Confirmar según tu configuración de proveedor (Hostinger generalmente usa STARTTLS en 587)
+      mail.smtp.ssl.trust: ${MAIL_HOST} # Toma la variable de entorno
+    default-encoding: UTF-8
+
+  admin:
+    email: ${ADMIN_EMAIL} # Sin valor por defecto aquí, se espera de variable de entorno
+
+server:
+  port: ${SERVER_PORT:8085} # El puerto puede tener un valor por defecto para desarrollo local
+
+jwt:
+  secret: ${JWT_SECRET} # ¡CRÍTICO! SIN valor por defecto para seguridad
+  accessMs: ${JWT_ACCESS_MS:3600000} # Las duraciones pueden tener valores por defecto
+  refreshMs: ${JWT_REFRESH_MS:86400000} # Las duraciones pueden tener valores por defecto
+
+# URLs de comunicación con otros microservicios (¡usando dominios internos de Railway!)
+external:
+  user-service: ${USERS_SVC_URL:https://users-service-production-70b4.up.railway.app} # Dominio interno de Railway
+                                                                           # Ajusta 'users-service' al nombre exacto de tu servicio en Railway
+  file-service: ${FILE_SVC_URL:https://file-service-production-7494.up.railway.app} # Dominio interno de Railway
+                                                                         # Ajusta 'file-service' al nombre exacto de tu servicio en Railway
+  product-service: ${PRODUCT_SVC_URL:https://prod-service-production.up.railway.app} # Dominio interno de Railway
+                                                                            # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
+
+file:
+  upload-dir: ${UPLOAD_DIR:file-service/uploads} # Ruta de directorio genérica dentro del contenedor de Railway
+                                          # ¡Para persistencia real, configura un volumen persistente en Railway!
+
+paypal:
+  client-id: ${PAYPAL_CLIENT_ID} # SIN valor por defecto aquí, se espera de variable de entorno
+  client-secret: ${PAYPAL_CLIENT_SECRET} # SIN valor por defecto aquí, se espera de variable de entorno
+  environment: ${PAYPAL_ENVIRONMENT:sandbox} # El entorno de PayPal puede tener un valor por defecto, como 'sandbox'
+
+logging:
+  level:
+    com.aec.ordsrv: DEBUG # Nivel de logging específico para tu paquete de órdenes
+    org.springframework.web: DEBUG # Nivel de logging para el framework web de Spring
+    root: INFO # Considera 'INFO' o 'WARN' para producción, 'DEBUG' es muy verboso
