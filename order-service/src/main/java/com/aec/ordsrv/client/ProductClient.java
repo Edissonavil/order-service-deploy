@@ -13,7 +13,7 @@ import com.aec.ordsrv.dto.ProductDto;
 // src/main/java/com/aec/ordsrv/client/ProductClient.java
 @FeignClient(
     name = "product-service",
-    url  = "${product.service.url}",          // →  http://localhost:8083
+    url  = "${product.service}",        
     path = "/api/products"   
   )                   // <-- prefijo correcto
 public interface ProductClient {
