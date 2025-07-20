@@ -55,7 +55,7 @@ external:
                                                                             # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
 
 file:
-  upload-dir: ${UPLOAD_DIR:file-service/uploads} # Ruta de directorio genérica dentro del contenedor de Railway
+  upload-dir: ${UPLOAD_DIR:uploads} # Ruta de directorio genérica dentro del contenedor de Railway
                                           # ¡Para persistencia real, configura un volumen persistente en Railway!
 
 paypal:

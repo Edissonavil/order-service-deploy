@@ -1,0 +1,4 @@
+# Ignorar carpetas de compilación de Maven
+/target/
+**/target/
+

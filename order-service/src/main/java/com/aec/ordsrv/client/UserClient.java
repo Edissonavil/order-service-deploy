@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.aec.ordsrv.config.FeignConfig;
 import com.aec.ordsrv.dto.UserResponseDto;
 
-@FeignClient(name = "user-service", url = "${user.service.url}")
+@FeignClient(name = "user", url = "${external.user-service}")
 public interface UserClient {
     @GetMapping("/api/users/by-username/{username}")
     UserResponseDto getByUsername(@PathVariable String username);
