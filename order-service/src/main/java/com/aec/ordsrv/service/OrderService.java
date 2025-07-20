@@ -63,7 +63,7 @@ public class OrderService {
     private final UserClient userClient;
     private final WebClient userWebClient;
 
-    @Value("${file.service.url}")
+    @Value("${file-service}")
     private String fileServiceUrl;
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
