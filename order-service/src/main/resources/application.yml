@@ -47,15 +47,15 @@ jwt:
 
 # URLs de comunicación con otros microservicios (¡usando dominios internos de Railway!)
 external:
-  user-service: ${USERS_SVC_URL:http://users-service.railway.internal:8081} # Dominio interno de Railway
+  user-service: ${USERS_SVC_URL:https://users-service-production-70b4.up.railway.app} # Dominio interno de Railway
                                                                            # Ajusta 'users-service' al nombre exacto de tu servicio en Railway
-  file-service: ${FILE_SVC_URL:http://file-service.railway.internal:8084} # Dominio interno de Railway
+  file-service: ${FILE_SVC_URL:https://file-service-production-7494.up.railway.app} # Dominio interno de Railway
                                                                          # Ajusta 'file-service' al nombre exacto de tu servicio en Railway
-  product-service: ${PRODUCT_SVC_URL:http://aec-prod.railway.internal:8083} # Dominio interno de Railway
+  product-service: ${PRODUCT_SVC_URL:https://prod-service-production.up.railway.app} # Dominio interno de Railway
                                                                             # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
 
 file:
-  upload-dir: ${UPLOAD_DIR:/file-service/uploads} # Ruta de directorio genérica dentro del contenedor de Railway
+  upload-dir: ${UPLOAD_DIR:file-service/uploads} # Ruta de directorio genérica dentro del contenedor de Railway
                                           # ¡Para persistencia real, configura un volumen persistente en Railway!
 
 paypal:
