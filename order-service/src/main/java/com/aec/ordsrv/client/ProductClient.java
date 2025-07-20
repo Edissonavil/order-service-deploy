@@ -13,9 +13,9 @@ import com.aec.ordsrv.dto.ProductDto;
 // src/main/java/com/aec/ordsrv/client/ProductClient.java
 @FeignClient(
     name = "product-service",
-    url  = "${product.service}",        
-    path = "/api/products"   
-  )                   // <-- prefijo correcto
+    url  = "${external.product-service}", 
+    path = "/api/products"
+)                 // <-- prefijo correcto
 public interface ProductClient {
   @GetMapping("/{id}")
   ProductDto getById(@PathVariable("id") Long id,
