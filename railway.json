@@ -1,0 +1,7 @@
+{
+  "build": {
+    "command": "mvn clean install -DskipTests"
+  },
+  "start": "java -jar order-service/target/order-service-0.0.1-SNAPSHOT.jar"
+}
+
