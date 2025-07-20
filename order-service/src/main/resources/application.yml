@@ -47,11 +47,11 @@ jwt:
 
 # URLs de comunicación con otros microservicios (¡usando dominios internos de Railway!)
 external:
-  user-service: ${USERS_SVC_URL:https://users-service-production-70b4.up.railway.app} # Dominio interno de Railway
+  user-service: ${USERS_SVC_URL:https://users-service.railway.internal} # Dominio interno de Railway
                                                                            # Ajusta 'users-service' al nombre exacto de tu servicio en Railway
-  file-service: ${FILE_SVC_URL:https://file-service-production-7494.up.railway.app} # Dominio interno de Railway
+  file-service: ${FILE_SVC_URL:https://file-service.railway.internal} # Dominio interno de Railway
                                                                          # Ajusta 'file-service' al nombre exacto de tu servicio en Railway
-  product-service: ${PRODUCT_SVC_URL:https://prod-service-production.up.railway.app} # Dominio interno de Railway
+  product-service: ${PRODUCT_SVC_URL:https://https://prod-service.railway.internal} # Dominio interno de Railway
                                                                             # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
 
 file:
