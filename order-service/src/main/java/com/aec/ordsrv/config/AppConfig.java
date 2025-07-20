@@ -1,6 +1,7 @@
 package com.aec.ordsrv.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -11,8 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class AppConfig {
 
-    @Value("${user.service.url}")
-    private String userServiceUrl;
+@Value("${external.user-service}")
+private String userServiceUrl;
 
     @Bean("userWebClient")
     public WebClient userWebClient(WebClient.Builder builder) {
