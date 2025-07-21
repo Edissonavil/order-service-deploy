@@ -19,17 +19,8 @@ spring:
 
 server:
   port: ${PORT:8080}
-  address: 0.0.0.0
 
 jwt:
   secret: ${JWT_SECRET} # ¡CRÍTICO! SIN valor por defecto para seguridad
   accessMs: ${JWT_ACCESS_MS:3600000} # Las duraciones pueden tener valores por defecto
   refreshMs: ${JWT_REFRESH_MS:86400000} # Las duraciones pueden tener valores por defecto
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka 
-  instance:
-    prefer-ip-address: true  
-    instance-id: ${spring.application.name}:${random.value} 
