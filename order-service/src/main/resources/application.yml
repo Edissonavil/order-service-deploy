@@ -63,3 +63,11 @@ logging:
     com.aec.ordsrv: DEBUG # Nivel de logging específico para tu paquete de órdenes
     org.springframework.web: DEBUG # Nivel de logging para el framework web de Spring
     root: INFO # Considera 'INFO' o 'WARN' para producción, 'DEBUG' es muy verboso
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka 
+  instance:
+    prefer-ip-address: true  
+    instance-id: ${spring.application.name}:${random.value} 
