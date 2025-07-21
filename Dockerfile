@@ -2,6 +2,8 @@
 FROM maven:3.9.7-eclipse-temurin-21 AS build
 WORKDIR /app
 
+RUN apk add --no-cache curl
+
 # 1) Copiamos el pom padre (raíz) y los pom de los módulos
 COPY pom.xml .                                   
 COPY order-service/pom.xml order-service/
