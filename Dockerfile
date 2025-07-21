@@ -14,6 +14,6 @@ WORKDIR /app
 # Copia solo el jar del módulo que deseas ejecutar (aquí: order-service)
 COPY --from=build /app/order-service/target/order-service-*.jar app.jar
 
-EXPOSE 80
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.profiles.active=prod"]
 
