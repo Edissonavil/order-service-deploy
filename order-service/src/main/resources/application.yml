@@ -42,10 +42,10 @@ jwt:
   refreshMs: ${JWT_REFRESH_MS:86400000} 
 
 external:
-  user-service: http://${{users-service.RAILWAY_PRIVATE_DOMAIN}}
-  file-service: http://${{file-service.RAILWAY_PRIVATE_DOMAIN}}
-  product-service: http://${{prod-service.RAILWAY_PRIVATE_DOMAIN}}                                                                       # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
-
+  user-service: ${USERS_SVC_URL:http://users-service.railway.internal} # Dominio interno de Railway                                                                           # Ajusta 'users-service' al nombre exacto de tu servicio en Railway
+  file-service: ${FILE_SVC_URL:http://file-service.railway.internal} # Dominio interno de Railway                                                                         # Ajusta 'file-service' al nombre exacto de tu servicio en Railway
+  product-service: ${PRODUCT_SVC_URL:http://prod-service.railway.internal} # Dominio interno de Railway
+                                                                            # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
 file:
   upload-dir: ${UPLOAD_DIR:uploads} # Ruta de directorio genérica dentro del contenedor de Railway
 
