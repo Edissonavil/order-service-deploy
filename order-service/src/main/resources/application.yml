@@ -38,7 +38,7 @@ spring:
     email: ${ADMIN_EMAIL} # Sin valor por defecto aquí, se espera de variable de entorno
 
 server:
-  port: ${SERVER_PORT:8080} # El puerto puede tener un valor por defecto para desarrollo local
+  port: ${PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET} # ¡CRÍTICO! SIN valor por defecto para seguridad
