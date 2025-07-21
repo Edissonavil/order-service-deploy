@@ -1,28 +1,24 @@
 spring:
   application:
-    name: aec-order # Nombre de la aplicación
+    name: aec-order 
 
-  # Configuración de la base de datos
   datasource:
-    # Usamos las variables específicas de PostgreSQL que Railway inyecta directamente
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
     username: ${PGUSER}
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO:update} # 'update' es un valor por defecto común para desarrollo.
-                                    # Para producción en Railway, ¡usa 'validate' o 'none'!
-    show-sql: true # Útil para depuración. Considera 'false' en producción.
+      ddl-auto: ${DDL_AUTO:update} 
+    show-sql: true 
     properties:
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect # Siempre especifica el dialecto
 
-  # Configuración de correo electrónico
   mail:
-    host: ${MAIL_HOST} # Sin valor por defecto aquí, se espera de variable de entorno
-    port: ${MAIL_PORT:587} # Puerto puede tener valor por defecto
-    username: ${MAIL_USER} # Sin valor por defecto aquí, se espera de variable de entorno
-    password: ${MAIL_PASS} # Sin valor por defecto aquí, se espera de variable de entorno
+    host: ${MAIL_HOST} 
+    port: ${MAIL_PORT:587} 
+    username: ${MAIL_USER} 
+    password: ${MAIL_PASS} 
     protocol: smtp
     properties:
       mail.smtp.auth: true
@@ -30,24 +26,22 @@ spring:
       mail.smtp.connectiontimeout: ${MAIL_CONN_TIMEOUT:5000}
       mail.smtp.timeout: ${MAIL_TIMEOUT:5000}
       mail.smtp.writetimeout: ${MAIL_WRITE_TIMEOUT:5000}
-      mail.smtp.ssl.enable: false # Confirmar según tu configuración de proveedor (Hostinger generalmente usa STARTTLS en 587)
-      mail.smtp.ssl.trust: ${MAIL_HOST} # Toma la variable de entorno
+      mail.smtp.ssl.enable: false 
+      mail.smtp.ssl.trust: ${MAIL_HOST} 
     default-encoding: UTF-8
 
   admin:
-    email: ${ADMIN_EMAIL} # Sin valor por defecto aquí, se espera de variable de entorno
+    email: ${ADMIN_EMAIL} 
 
 server:
   port: ${PORT:8080}
   address: 0.0.0.0 
 
-
 jwt:
-  secret: ${JWT_SECRET} # ¡CRÍTICO! SIN valor por defecto para seguridad
-  accessMs: ${JWT_ACCESS_MS:3600000} # Las duraciones pueden tener valores por defecto
-  refreshMs: ${JWT_REFRESH_MS:86400000} # Las duraciones pueden tener valores por defecto
+  secret: ${JWT_SECRET}
+  accessMs: ${JWT_ACCESS_MS:3600000} 
+  refreshMs: ${JWT_REFRESH_MS:86400000} 
 
-# URLs de comunicación con otros microservicios (¡usando dominios internos de Railway!)
 external:
   user-service: ${USERS_SVC_URL:https://users-service.railway.internal} # Dominio interno de Railway
                                                                            # Ajusta 'users-service' al nombre exacto de tu servicio en Railway
@@ -58,7 +52,6 @@ external:
 
 file:
   upload-dir: ${UPLOAD_DIR:uploads} # Ruta de directorio genérica dentro del contenedor de Railway
-                                          # ¡Para persistencia real, configura un volumen persistente en Railway!
 
 paypal:
   client-id: ${PAYPAL_CLIENT_ID} # SIN valor por defecto aquí, se espera de variable de entorno
