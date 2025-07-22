@@ -102,21 +102,12 @@ public class SecurityConfig {
         @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-
-        // 1) Orígenes permitidos — incluye aquí localhost y tus dominios en producción
-        cfg.setAllowedOrigins(List.of(
-            "https://aecf-production.up.railway.app",
-            "https://aecblock.com"
-        ));
-        // 2) Métodos HTTP permitidos
+        cfg.setAllowedOrigins(List.of("https://gateway-production-129e.up.railway.app","https://aecf-production.up.railway.app"));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        // 3) Headers permitidos
         cfg.setAllowedHeaders(List.of("*"));
-        // 4) Permitir enviar cookies o Authorization headers
         cfg.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Aplica a todas las rutas
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
