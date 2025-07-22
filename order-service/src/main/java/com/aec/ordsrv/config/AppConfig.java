@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class AppConfig {
 
-@Value("${external.user-service}")
+    @Value("${USERS_SERVICE_URL:http://users-service.railway.internal}")
 private String userServiceUrl;
 
     @Bean("userWebClient")
