@@ -47,15 +47,13 @@ feign:
   client:
     config:
       users-service:
-        url: ${USERS_SERVICE_URL:http://users-service.railway.internal}
+        url: ${USERS_SERVICE_URL:http://users-service.railway.internal:8081}
       auth-service:
-        url: ${AUTH_SERVICE_URL:http://auth-service.railway.internal}
+        url: ${AUTH_SERVICE_URL:http://auth-service.railway.internal:8082}
       prod-service:
-        url: ${PROD_SERVICE_URL:http://prod-service.railway.internal}
+        url: ${PROD_SERVICE_URL:http://prod-service.railway.internal:8083}
       file-service:
-        url: ${FILE_SERVICE_URL:http://file-service.railway.internal}
-      order-service-deploy:
-        url: ${ORDER_SERVICE_URL:http://order-service-deploy.railway.internal}
+        url: ${FILE_SERVICE_URL:http://file-service.railway.internal:8084}
 
 file:
   upload-dir: ${UPLOAD_DIR:/app/uploads}
