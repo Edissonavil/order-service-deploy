@@ -41,10 +41,20 @@ jwt:
   accessMs: ${JWT_ACCESS_MS:3600000} 
   refreshMs: ${JWT_REFRESH_MS:86400000} 
 
-external:
-  user-service: ${USERS_SERVICE_URL:http://users-service.railway.internal}
-  file-service:    ${FILE_SERVICE_URL:http://file-service.railway.internal}
-  product-service: ${PROD_SERVICE_URL:http://prod-service.railway.internal}
+# al mismo nivel de spring:
+feign:
+  client:
+    config:
+      users-service:
+        url: ${USERS_SERVICE_URL:http://users-service.railway.internal}
+      auth-service:
+        url: ${AUTH_SERVICE_URL:http://auth-service.railway.internal}
+      prod-service:
+        url: ${PROD_SERVICE_URL:http://prod-service.railway.internal}
+      file-service:
+        url: ${FILE_SERVICE_URL:http://file-service.railway.internal}
+      order-service-deploy:
+        url: ${ORDER_SERVICE_URL:http://order-service-deploy.railway.internal}
 
 file:
   upload-dir: ${UPLOAD_DIR:/app/uploads} 
