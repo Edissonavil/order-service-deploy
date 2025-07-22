@@ -44,8 +44,6 @@
   <artifactId>events</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 </dependency>
-<!-- Si usas Maven -->
-<dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
