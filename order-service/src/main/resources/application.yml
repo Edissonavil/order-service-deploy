@@ -42,20 +42,21 @@ jwt:
   refreshMs: ${JWT_REFRESH_MS:86400000} 
 
 external:
-  user-service: ${USERS_SVC_URL:http://users-service.railway.internal} # Dominio interno de Railway                                                                           # Ajusta 'users-service' al nombre exacto de tu servicio en Railway
-  file-service: ${FILE_SVC_URL:http://file-service.railway.internal} # Dominio interno de Railway                                                                         # Ajusta 'file-service' al nombre exacto de tu servicio en Railway
-  product-service: ${PRODUCT_SVC_URL:http://prod-service.railway.internal} # Dominio interno de Railway
-                                                                            # Ajusta 'aec-prod' al nombre exacto de tu servicio en Railway
+external:
+  user-service: ${USERS_SERVICE_URL:http://users-service.railway.internal}
+  file-service:    ${FILE_SERVICE_URL:http://file-service.railway.internal}
+  product-service: ${PROD_SERVICE_URL:http://prod-service.railway.internal}
+
 file:
-  upload-dir: ${UPLOAD_DIR:uploads} # Ruta de directorio genérica dentro del contenedor de Railway
+  upload-dir: ${UPLOAD_DIR:uploads} 
 
 paypal:
-  client-id: ${PAYPAL_CLIENT_ID} # SIN valor por defecto aquí, se espera de variable de entorno
-  client-secret: ${PAYPAL_CLIENT_SECRET} # SIN valor por defecto aquí, se espera de variable de entorno
-  environment: ${PAYPAL_ENVIRONMENT:sandbox} # El entorno de PayPal puede tener un valor por defecto, como 'sandbox'
+  client-id: ${PAYPAL_CLIENT_ID} 
+  client-secret: ${PAYPAL_CLIENT_SECRET} 
+  environment: ${PAYPAL_ENVIRONMENT:sandbox} 
 
 logging:
   level:
-    com.aec.ordsrv: DEBUG # Nivel de logging específico para tu paquete de órdenes
-    org.springframework.web: DEBUG # Nivel de logging para el framework web de Spring
-    root: INFO # Considera 'INFO' o 'WARN' para producción, 'DEBUG' es muy verboso
+    com.aec.ordsrv: DEBUG 
+    org.springframework.web: DEBUG 
+    root: INFO 
