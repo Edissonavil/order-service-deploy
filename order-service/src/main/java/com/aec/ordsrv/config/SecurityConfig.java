@@ -15,9 +15,13 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -32,6 +36,7 @@ public class SecurityConfig {
                                                    JwtAuthenticationConverter jwtAuthConverter) throws Exception {
 
         http
+          .cors(cors -> cors.configurationSource(corsConfigurationSource()))
           .csrf(csrf -> csrf.disable())
           .authorizeHttpRequests(auth -> auth
 
@@ -92,5 +97,27 @@ public class SecurityConfig {
                       .collect(Collectors.toList())
         );
         return conv;
+    }
+
+        @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+
+        // 1) Orígenes permitidos — incluye aquí localhost y tus dominios en producción
+        cfg.setAllowedOrigins(List.of(
+            "https://aecf-production.up.railway.app",
+            "https://aecblock.com"
+        ));
+        // 2) Métodos HTTP permitidos
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        // 3) Headers permitidos
+        cfg.setAllowedHeaders(List.of("*"));
+        // 4) Permitir enviar cookies o Authorization headers
+        cfg.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Aplica a todas las rutas
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
     }
 }

@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders/cart")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class CartController {
     private final OrderService orderService; // <-- ¡Inyectamos OrderService!
