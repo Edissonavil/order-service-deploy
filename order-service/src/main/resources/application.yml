@@ -1,6 +1,7 @@
+# application-railway.yml
 spring:
   application:
-    name: aec-order 
+    name: aec-order
 
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
@@ -9,16 +10,16 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO:update} 
-    show-sql: true 
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: true
     properties:
-      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect # Siempre especifica el dialecto
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 
   mail:
-    host: ${MAIL_HOST} 
-    port: ${MAIL_PORT:587} 
-    username: ${MAIL_USER} 
-    password: ${MAIL_PASS} 
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USER}
+    password: ${MAIL_PASS}
     protocol: smtp
     properties:
       mail.smtp.auth: true
@@ -26,22 +27,21 @@ spring:
       mail.smtp.connectiontimeout: ${MAIL_CONN_TIMEOUT:5000}
       mail.smtp.timeout: ${MAIL_TIMEOUT:5000}
       mail.smtp.writetimeout: ${MAIL_WRITE_TIMEOUT:5000}
-      mail.smtp.ssl.enable: false 
-      mail.smtp.ssl.trust: ${MAIL_HOST} 
+      mail.smtp.ssl.enable: false
+      mail.smtp.ssl.trust: ${MAIL_HOST}
     default-encoding: UTF-8
 
 admin:
-  email: ${ADMIN_EMAIL} 
+  email: ${ADMIN_EMAIL}
 
 server:
   port: ${PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET}
-  accessMs: ${JWT_ACCESS_MS:3600000} 
-  refreshMs: ${JWT_REFRESH_MS:86400000} 
+  accessMs: ${JWT_ACCESS_MS:3600000}
+  refreshMs: ${JWT_REFRESH_MS:86400000}
 
-# al mismo nivel de spring:
 feign:
   client:
     config:
@@ -57,15 +57,15 @@ feign:
         url: ${ORDER_SERVICE_URL:http://order-service-deploy.railway.internal}
 
 file:
-  upload-dir: ${UPLOAD_DIR:/app/uploads} 
+  upload-dir: ${UPLOAD_DIR:/app/uploads}
 
 paypal:
-  client-id: ${PAYPAL_CLIENT_ID} 
-  client-secret: ${PAYPAL_CLIENT_SECRET} 
-  environment: ${PAYPAL_ENVIRONMENT:sandbox} 
+  client-id: ${PAYPAL_CLIENT_ID}
+  client-secret: ${PAYPAL_CLIENT_SECRET}
+  environment: ${PAYPAL_ENVIRONMENT:sandbox}
 
 logging:
   level:
-    com.aec.ordsrv: DEBUG 
-    org.springframework.web: DEBUG 
-    root: INFO 
+    com.aec.ordsrv: DEBUG
+    org.springframework.web: DEBUG
+    root: INFO
