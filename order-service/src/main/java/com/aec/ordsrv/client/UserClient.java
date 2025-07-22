@@ -9,8 +9,9 @@ import com.aec.ordsrv.dto.UserResponseDto;
 
 @FeignClient(
     name = "users-service",
-    path = "/api/users"
-)public interface UserClient {
+    url  = "${USERS_SERVICE_URL}"
+)
+public interface UserClient {
     @GetMapping("/api/users/by-username/{username}")
     UserResponseDto getByUsername(@PathVariable String username);
 }

@@ -1,4 +1,4 @@
-# application-railway.yml
+# src/main/resources/application-railway.yml
 spring:
   application:
     name: aec-order
@@ -8,6 +8,7 @@ spring:
     username: ${PGUSER}
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: ${DDL_AUTO:update}
@@ -42,6 +43,7 @@ jwt:
   accessMs: ${JWT_ACCESS_MS:3600000}
   refreshMs: ${JWT_REFRESH_MS:86400000}
 
+# Configuración de Feign clients
 feign:
   client:
     config:
