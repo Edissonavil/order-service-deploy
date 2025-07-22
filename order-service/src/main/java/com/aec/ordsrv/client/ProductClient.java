@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import com.aec.ordsrv.dto.ProductDto;
 
 // src/main/java/com/aec/ordsrv/client/ProductClient.java
-@FeignClient(name = "prod-service", path = "/api/products")
-public interface ProductClient {
+@FeignClient(
+    name = "prod-service",
+    // idem para PROD_SERVICE_URL
+    url  = "${PROD_SERVICE_URL:http://prod-service.railway.internal}",
+    path = "/api/products"
+)public interface ProductClient {
   @GetMapping("/{id}")
   ProductDto getById(@PathVariable("id") Long id,
       @RequestHeader("Authorization") String bearer);
