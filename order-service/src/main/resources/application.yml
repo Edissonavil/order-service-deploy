@@ -43,7 +43,6 @@ jwt:
   accessMs: ${JWT_ACCESS_MS:3600000}
   refreshMs: ${JWT_REFRESH_MS:86400000}
 
-# Configuración de Feign clients
 feign:
   client:
     config:
